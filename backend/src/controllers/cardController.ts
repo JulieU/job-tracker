@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { CreateCardInput, UpdateCardInput } from "../types";
+import { getCompanyLogo } from "../services/logoService";
 
 // POST /api/columns/:id/cards
 export const createCard = async (req: Request, res: Response) => {
@@ -48,5 +49,21 @@ export const deleteCard = async (req: Request, res: Response) => {
     res.json({ message: "Card deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete card" });
+  }
+};
+
+// GET /api/logo?company=CompanyName
+export const fetchCompanyLogo = async (req: Request, res: Response) => {
+  try {
+    const { company } = req.query;
+    if (!company || typeof company !== "string") {
+      res.status(400).json({ error: "Company name is required" });
+      return;
+    }
+
+    const result = await getCompanyLogo(company);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch company logo" });
   }
 };

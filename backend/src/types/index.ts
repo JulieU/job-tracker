@@ -29,3 +29,7 @@ export interface UpdateCardInput {
   order?: number;
   columnId?: number;
 }
+
+export interface LogoResult {
+  logoUrl: string | null;
+}
