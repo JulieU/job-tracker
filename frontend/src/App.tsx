@@ -1,6 +1,7 @@
 import { useState, useEffect, use } from "react";
 import type { Board } from "./types";
 import { getBoards, createBoard } from "./api";
+import BoardView from "./components/Board/BoardView";
 
 function App() {
   const [boards, setBoards] = useState<Board[]>([]);
@@ -69,9 +70,7 @@ function App() {
             </p>
           </div>
         ) : (
-          <p className="text-gray-600">
-            Board loaded! Component coming next...
-          </p>
+          <BoardView board={boards[0]} onBoardUpdate={loadBoards} />
         )}
       </main>
     </div>
