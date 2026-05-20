@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { Column as ColumnType } from "../../types";
+import JobCard from "../Card/JobCard";
 
 interface ColumnProps {
   column: ColumnType;
@@ -6,6 +8,7 @@ interface ColumnProps {
 }
 
 function Column({ column, onBoardUpdate }: ColumnProps) {
+  const [showModal, setShowModal] = useState(false);
   return (
     <div className="bg-gray-200 rounded-lg p-4 min-w-[280px] w-[280px]">
       {/* Column header */}
@@ -22,16 +25,16 @@ function Column({ column, onBoardUpdate }: ColumnProps) {
           <p className="text-center text-gray-400 text-sm py-4">No jobs yet</p>
         ) : (
           column.cards.map((card) => (
-            <div key={card.id} className="bg-white rounded-lg p-3 shadow-sm">
-              <p className="font-medium text-gray-800">{card.title}</p>
-              <p className="text-sm text-gray-500">{card.company}</p>
-            </div>
+            <JobCard key={card.id} card={card} onBoardUpdate={onBoardUpdate} />
           ))
         )}
       </div>
 
       {/* Add job button */}
-      <button className="mt-4 w-full text-gray-500 hover:text-gray-700 hover:bg-gray-300 rounded py-2 text-sm transition-colors">
+      <button
+        onClick={() => setShowModal(true)}
+        className="mt-4 w-full text-gray-500 hover:text-gray-700 hover:bg-gray-300 rounded py-2 text-sm transition-colors"
+      >
         + Add Job
       </button>
     </div>
