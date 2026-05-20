@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Column as ColumnType } from "../../types";
 import JobCard from "../Card/JobCard";
+import AddCardModal from "../Modal/AddCardModal";
 
 interface ColumnProps {
   column: ColumnType;
@@ -37,6 +38,16 @@ function Column({ column, onBoardUpdate }: ColumnProps) {
       >
         + Add Job
       </button>
+
+      {/* Modal */}
+      {showModal && (
+        <AddCardModal
+          columnId={column.id}
+          columnTitle={column.title}
+          onClose={() => setShowModal(false)}
+          onBoardUpdate={onBoardUpdate}
+        />
+      )}
     </div>
   );
 }

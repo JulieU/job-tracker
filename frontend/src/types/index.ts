@@ -38,6 +38,7 @@ export interface CreateCardInput {
   salary?: string;
   url?: string;
   notes?: string;
+  logoUrl?: string;
   order: number;
 }
 
