@@ -1,7 +1,13 @@
 import { useState } from "react";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
 import type { Column as ColumnType } from "../../types";
 import JobCard from "../Card/JobCard";
 import AddCardModal from "../Modal/AddCardModal";
+import { toColumnId } from "../Board/BoardView";
 
 interface ColumnProps {
   column: ColumnType;
@@ -10,8 +16,13 @@ interface ColumnProps {
 
 function Column({ column, onBoardUpdate }: ColumnProps) {
   const [showModal, setShowModal] = useState(false);
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: toColumnId(column.id),
+  });
+
   return (
-    <div className="bg-gray-200 rounded-lg p-4 min-w-[280px] w-[280px]">
+    <div className="bg-gray-200 rounded-lg p-4 min-w-[280px] w-[280px] flex flex-col">
       {/* Column header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-gray-700">{column.title}</h2>
@@ -20,16 +31,32 @@ function Column({ column, onBoardUpdate }: ColumnProps) {
         </span>
       </div>
 
-      {/* Cards list */}
-      <div className="flex flex-col gap-2">
-        {column.cards.length === 0 ? (
-          <p className="text-center text-gray-400 text-sm py-4">No jobs yet</p>
-        ) : (
-          column.cards.map((card) => (
-            <JobCard key={card.id} card={card} onBoardUpdate={onBoardUpdate} />
-          ))
-        )}
-      </div>
+      {/* Sortable cards list */}
+      <SortableContext
+        items={column.cards.map((c) => c.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div
+          ref={setNodeRef}
+          className={`flex flex-col gap-2 flex-1 min-h-[200px] rounded-lg transition-colors ${
+            isOver ? "bg-blue-50" : ""
+          }`}
+        >
+          {column.cards.length === 0 ? (
+            <p className="text-center text-gray-400 text-sm py-4">
+              No jobs yet
+            </p>
+          ) : (
+            column.cards.map((card) => (
+              <JobCard
+                key={card.id}
+                card={card}
+                onBoardUpdate={onBoardUpdate}
+              />
+            ))
+          )}
+        </div>
+      </SortableContext>
 
       {/* Add job button */}
       <button

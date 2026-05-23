@@ -8,14 +8,22 @@ export const createCard = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const cardData: CreateCardInput = req.body;
+
     if (!cardData.title || !cardData.company) {
       res.status(400).json({ error: "Title and company are required" });
       return;
     }
+
+    // Get current card count to set correct order
+    const cardCount = await prisma.card.count({
+      where: { columnId: Number(id) },
+    });
+
     const card = await prisma.card.create({
       data: {
         ...cardData,
         columnId: Number(id),
+        order: cardCount, // always place at the end
       },
     });
     res.status(201).json(card);

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { Card } from "../../types";
 import CardDetailModal from "../Modal/CardDetailModal";
 
@@ -10,11 +12,30 @@ interface JobCardProps {
 function JobCard({ card, onBoardUpdate }: JobCardProps) {
   const [showDetail, setShowDetail] = useState(false);
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: card.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.3 : 1,
+  };
+
   return (
     <>
       <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
         onClick={() => setShowDetail(true)}
-        className="bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+        className="bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing"
       >
         {/* Company logo and name */}
         <div className="flex items-center gap-2 mb-2">
