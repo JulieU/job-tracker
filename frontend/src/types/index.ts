@@ -52,3 +52,12 @@ export interface UpdateCardInput {
   columnId?: number;
   order?: number;
 }
+
+export interface JobFormData {
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  url: string;
+  notes: string;
+}
