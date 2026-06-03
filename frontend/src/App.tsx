@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import type { Board } from "./types";
 import { getBoards, createBoard } from "./api";
 import BoardView from "./components/Board/BoardView";

@@ -41,9 +41,10 @@ function EditCardModal({ card, onClose, onBoardUpdate }: EditCardModalProps) {
       setIsSubmitting(true);
       setError(null);
 
-      let logoUrl = card.logoUrl;
+      let logoUrl: string | undefined = card.logoUrl || undefined;
       if (form.company !== card.company) {
-        logoUrl = await fetchLogo(form.company);
+        const fetched = await fetchLogo(form.company);
+        logoUrl = fetched || undefined;
       }
 
       const cardData: UpdateCardInput = {

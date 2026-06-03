@@ -49,6 +49,7 @@ export interface UpdateCardInput {
   salary?: string;
   url?: string;
   notes?: string;
+  logoUrl?: string;
   columnId?: number;
   order?: number;
 }
