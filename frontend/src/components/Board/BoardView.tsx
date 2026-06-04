@@ -11,7 +11,6 @@ import {
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { Board, Card } from "../../types";
 import Column from "../Column/Column";
-import JobCard from "../Card/JobCard";
 import { updateCard } from "../../api";
 
 interface BoardViewProps {
