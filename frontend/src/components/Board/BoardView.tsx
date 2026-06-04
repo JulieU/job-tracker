@@ -110,11 +110,7 @@ function BoardView({ board, onBoardUpdate }: BoardViewProps) {
     const { active, over } = event;
     setActiveCard(null);
 
-    if (!over) {
-      // Reset to server state if dropped nowhere
-      onBoardUpdate();
-      return;
-    }
+    if (!over) return;
 
     const activeCardId = Number(active.id);
     const overId = over.id.toString();
@@ -141,15 +137,14 @@ function BoardView({ board, onBoardUpdate }: BoardViewProps) {
     const newOrder = overCard ? overCard.order : targetColumn.cards.length;
 
     try {
+      // Save to server silently — no board reload
       await updateCard(activeCardId, {
         columnId: targetColumn.id,
         order: newOrder,
       });
-      // Sync with server after successful update
-      onBoardUpdate();
     } catch (err) {
       console.error("Failed to move card:", err);
-      // Reset to server state if API call fails
+      // Only reload if something went wrong to reset to correct state
       onBoardUpdate();
     }
   };
