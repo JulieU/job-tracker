@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -11,6 +11,7 @@ import {
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { Board, Card } from "../../types";
 import Column from "../Column/Column";
+import JobCard from "../Card/JobCard";
 import { updateCard } from "../../api";
 
 interface BoardViewProps {
@@ -18,13 +19,18 @@ interface BoardViewProps {
   onBoardUpdate: () => void;
 }
 
-// Prefix column ids to avoid conflicts with card ids
 export const toColumnId = (id: number) => `column-${id}`;
 export const fromColumnId = (id: string) => Number(id.replace("column-", ""));
 export const isColumnId = (id: string) => id.toString().startsWith("column-");
 
 function BoardView({ board, onBoardUpdate }: BoardViewProps) {
   const [activeCard, setActiveCard] = useState<Card | null>(null);
+  const [localBoard, setLocalBoard] = useState(board);
+
+  // Keep localBoard in sync when board prop changes
+  useEffect(() => {
+    setLocalBoard(board);
+  }, [board]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -44,47 +50,94 @@ function BoardView({ board, onBoardUpdate }: BoardViewProps) {
 
   const handleDragStart = (event: any) => {
     const { active } = event;
-    const card = board.columns
+    const card = localBoard.columns
       .flatMap((col) => col.cards)
       .find((c) => c.id === Number(active.id));
     setActiveCard(card || null);
   };
 
   const handleDragOver = (event: any) => {
-    const { over } = event;
+    const { active, over } = event;
     if (!over) return;
+
+    const activeCardId = Number(active.id);
+    const overId = over.id.toString();
+
+    if (activeCardId === Number(overId)) return;
+
+    const sourceColumn = localBoard.columns.find((col) =>
+      col.cards.some((c) => c.id === activeCardId),
+    );
+
+    let targetColumn;
+    if (isColumnId(overId)) {
+      targetColumn = localBoard.columns.find(
+        (col) => col.id === fromColumnId(overId),
+      );
+    } else {
+      targetColumn = localBoard.columns.find((col) =>
+        col.cards.some((c) => c.id === Number(overId)),
+      );
+    }
+
+    if (!sourceColumn || !targetColumn) return;
+    if (sourceColumn.id === targetColumn.id) return;
+
+    // Optimistically move the card to the new column instantly
+    setLocalBoard((prev) => {
+      const card = sourceColumn.cards.find((c) => c.id === activeCardId)!;
+      return {
+        ...prev,
+        columns: prev.columns.map((col) => {
+          if (col.id === sourceColumn.id) {
+            return {
+              ...col,
+              cards: col.cards.filter((c) => c.id !== activeCardId),
+            };
+          }
+          if (col.id === targetColumn!.id) {
+            return {
+              ...col,
+              cards: [...col.cards, { ...card, columnId: targetColumn!.id }],
+            };
+          }
+          return col;
+        }),
+      };
+    });
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveCard(null);
 
-    if (!over) return;
+    if (!over) {
+      // Reset to server state if dropped nowhere
+      onBoardUpdate();
+      return;
+    }
 
     const activeCardId = Number(active.id);
     const overId = over.id.toString();
 
-    // Find source column
-    const sourceColumn = board.columns.find((col) =>
+    const sourceColumn = localBoard.columns.find((col) =>
       col.cards.some((c) => c.id === activeCardId),
     );
     if (!sourceColumn) return;
 
-    // Find target column — either directly a column or via a card
     let targetColumn;
     if (isColumnId(overId)) {
-      targetColumn = board.columns.find(
+      targetColumn = localBoard.columns.find(
         (col) => col.id === fromColumnId(overId),
       );
     } else {
-      targetColumn = board.columns.find((col) =>
+      targetColumn = localBoard.columns.find((col) =>
         col.cards.some((c) => c.id === Number(overId)),
       );
     }
 
     if (!targetColumn) return;
 
-    // Calculate new order based on position
     const overCard = targetColumn.cards.find((c) => c.id === Number(overId));
     const newOrder = overCard ? overCard.order : targetColumn.cards.length;
 
@@ -93,9 +146,12 @@ function BoardView({ board, onBoardUpdate }: BoardViewProps) {
         columnId: targetColumn.id,
         order: newOrder,
       });
+      // Sync with server after successful update
       onBoardUpdate();
     } catch (err) {
       console.error("Failed to move card:", err);
+      // Reset to server state if API call fails
+      onBoardUpdate();
     }
   };
 
@@ -108,7 +164,7 @@ function BoardView({ board, onBoardUpdate }: BoardViewProps) {
       onDragEnd={handleDragEnd}
     >
       <div className="flex gap-4 overflow-x-auto pb-4">
-        {board.columns.map((column) => (
+        {localBoard.columns.map((column) => (
           <Column
             key={column.id}
             column={column}
