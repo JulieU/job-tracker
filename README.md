@@ -2,7 +2,7 @@
 
 A full-stack Kanban board application for tracking job applications through the hiring process.
 
-**Live Demo:** https://job-tracker-ck5rkwk66-julieus-projects.vercel.app
+**Live Demo:** https://job-tracker-livid-beta.vercel.app/
 
 ---
 
@@ -38,7 +38,7 @@ A full-stack Kanban board application for tracking job applications through the 
 ### Deployment
 
 - Frontend → Vercel
-- Backend + Database → Railway
+- Backend + Database → Render
 
 ---
 
@@ -47,9 +47,9 @@ A full-stack Kanban board application for tracking job applications through the 
 ```
 Vercel (React Frontend)
         ↓
-Railway (Express REST API)
+Render (Express REST API)
         ↓
-Railway PostgreSQL Database
+Render PostgreSQL Database
         ↓
 Logo.dev API (company logos)
 ```
@@ -173,6 +173,12 @@ job-tracker/
 
 ---
 
+## Note on Render Free Tier
+
+The backend is hosted on Render's free tier which spins down after 15 minutes of inactivity. The first request after inactivity may take 30-60 seconds to wake up. Subsequent requests will be fast.
+
+---
+
 ## What I Learned
 
 - Building a REST API with Express and TypeScript
@@ -180,5 +186,5 @@ job-tracker/
 - React component architecture and state management
 - TypeScript interfaces and type safety across the full stack
 - Drag and drop with optimistic UI updates
-- Deploying a full stack application to Vercel and Railway
+- Deploying a full stack application to Vercel and Render
 - Git version control and GitHub workflow
